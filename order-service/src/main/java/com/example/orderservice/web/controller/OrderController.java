@@ -26,10 +26,4 @@ public class OrderController {
         orderService.createOrder(orderDTO);
         return "Order placed";
     }
-
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping
-    public List<OrderResponseDTO> getAllOrders(){
-        return orderService.getAllOrders();
-    }
 }

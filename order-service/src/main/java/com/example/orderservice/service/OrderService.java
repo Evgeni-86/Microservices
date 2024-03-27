@@ -1,5 +1,6 @@
 package com.example.orderservice.service;
 
+import com.example.orderservice.dto.InventoryResponseDTO;
 import com.example.orderservice.dto.OrderDTO;
 import com.example.orderservice.dto.OrderItemResponseDTO;
 import com.example.orderservice.dto.OrderResponseDTO;
@@ -9,18 +10,25 @@ import com.example.orderservice.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 @Service
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final WebClient webClient;
 
-    public OrderService(@Autowired OrderRepository orderRepository) {
+    public OrderService(@Autowired OrderRepository orderRepository,
+                        @Autowired WebClient webClient) {
         this.orderRepository = orderRepository;
+        this.webClient = webClient;
     }
 
     @Transactional
@@ -34,27 +42,23 @@ public class OrderService {
                         .quantity(el.getQuantity())
                         .price(el.getPrice())
                         .order(order)
-                        .build()).toList();
+                        .build())
+                .toList();
 
         order.setOrderItemsList(orderItemList);
-        orderRepository.save(order);
-    }
 
-    public List<OrderResponseDTO> getAllOrders() {
-        return orderRepository.findAll().stream()
-                .map(el -> OrderResponseDTO.builder()
-                        .number(el.getNumber())
-                        .orderItemsList(toOrderItemResponseDTO(el.getOrderItemsList()))
-                        .build())
-                .toList();
-    }
-    private List<OrderItemResponseDTO> toOrderItemResponseDTO(List<OrderItem> orderItemList) {
-        return orderItemList.stream()
-                .map(el -> OrderItemResponseDTO.builder()
-                        .code(el.getCode())
-                        .quantity(el.getQuantity())
-                        .price(el.getPrice())
-                        .build())
-                .toList();
+        List<String> list = order.getOrderItemsList().stream().map(el -> el.getCode()).toList();
+
+        InventoryResponseDTO[] inventoryResponseDTOS = webClient.get()
+                .uri("http://localhost:8083/api/inventory",
+                        uriBuilder -> uriBuilder.queryParam("code", list).build())
+                .retrieve()
+                .bodyToMono(InventoryResponseDTO[].class)
+                .block();
+
+        boolean allProductsIsPresentInStock = Arrays.stream(inventoryResponseDTOS).allMatch(el -> el.isPresent());
+
+        if (allProductsIsPresentInStock) orderRepository.save(order);
+        else throw new IllegalArgumentException("Product not present in stock");
     }
 }
