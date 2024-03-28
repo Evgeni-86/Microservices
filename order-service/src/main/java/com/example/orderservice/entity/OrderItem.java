@@ -20,7 +20,17 @@ public class OrderItem {
     private String code;
     private Integer quantity;
     private Double price;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
+
+    @Override
+    public String toString() {
+        return "OrderItem{" +
+                "id=" + id +
+                ", code='" + code + '\'' +
+                ", quantity=" + quantity +
+                ", price=" + price +
+                '}';
+    }
 }

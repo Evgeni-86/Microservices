@@ -23,12 +23,12 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final WebClient webClient;
+    private final WebClient.Builder webClientBuilder;
 
     public OrderService(@Autowired OrderRepository orderRepository,
-                        @Autowired WebClient webClient) {
+                        @Autowired WebClient.Builder webClientBuilder) {
         this.orderRepository = orderRepository;
-        this.webClient = webClient;
+        this.webClientBuilder = webClientBuilder;
     }
 
     @Transactional
@@ -49,8 +49,8 @@ public class OrderService {
 
         List<String> list = order.getOrderItemsList().stream().map(el -> el.getCode()).toList();
 
-        InventoryResponseDTO[] inventoryResponseDTOS = webClient.get()
-                .uri("http://localhost:8083/api/inventory",
+        InventoryResponseDTO[] inventoryResponseDTOS = webClientBuilder.build().get()
+                .uri("http://inventory-service/api/inventory",
                         uriBuilder -> uriBuilder.queryParam("code", list).build())
                 .retrieve()
                 .bodyToMono(InventoryResponseDTO[].class)

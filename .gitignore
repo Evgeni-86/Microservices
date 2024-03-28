@@ -5,6 +5,7 @@ target/
 
 .idea
 */target/
+log/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

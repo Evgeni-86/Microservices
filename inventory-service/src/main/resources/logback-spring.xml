@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="LOGS" value="D:/JavaProjects/1/microservices/log/inventory-service" />
+    <property name="LOGS" value="D:/JavaProjects/microservices/log/inventory-service" />
 
     <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
         <layout class="ch.qos.logback.classic.PatternLayout">
@@ -33,7 +33,7 @@
 <!--        <appender-ref ref="Console" />-->
 <!--    </root>-->
 
-    <logger name="com.example" level="trace" additivity="false">
+    <logger name="com.example.inventoryservice" level="trace" additivity="false">
         <appender-ref ref="RollingFile" />
         <appender-ref ref="Console" />
     </logger>
