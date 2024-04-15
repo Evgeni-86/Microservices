@@ -19,23 +19,15 @@ public class LoggerAspect {
 
     @Around("execution(* com.example.productservice.repository.*.*(..))")
     public Object repositoryMethods(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-
-        long startTime = System.currentTimeMillis();
-        Object resultMethod = proceedingJoinPoint.proceed();
-        long endTime = System.currentTimeMillis();
-
-        LOG.info("target class: {}; method signature: {}; arguments: {}; time: {} ms",
-                proceedingJoinPoint.getTarget().toString(),
-                proceedingJoinPoint.getSignature(),
-                Arrays.stream(proceedingJoinPoint.getArgs())
-                        .map(Object::toString).collect(Collectors.toList()), endTime - startTime);
-
-        return resultMethod;
+        return getObject(proceedingJoinPoint);
     }
 
     @Around("execution(* com.example.productservice.service.*.*(..))")
     public Object serviceMethods(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+        return getObject(proceedingJoinPoint);
+    }
 
+    private Object getObject(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
         Object resultMethod = proceedingJoinPoint.proceed();
         long endTime = System.currentTimeMillis();
